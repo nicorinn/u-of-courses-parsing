@@ -1,0 +1,1232 @@
+﻿/* Need to switch to SASS now. */
+@import url("partials/charting.css");
+@import url("partials/svg-charting.css");
+@import url("partials/report-block.css");
+@import url("partials/csscharting-frequency-horizontal.css");
+@import url("partials/csscharting-crosscategory-horizontal.css");
+@import url("partials/csscharting-score-horizontal.css");
+
+/**************************
+
+    Some notes:
+
+    Making everything decendants of report viewer so that the file can be reused where needed
+
+    All charts are double the width and height of their respective tag attributes.
+    To ensure no loss of quality be sure to maintain that ratio when adjusting the stylesheet.
+
+*********************************/
+body {
+    max-width: 802px;
+    margin: auto;
+    font-family: Arial, Verdana, sans-serif;
+    font-size: 10pt;
+    line-height: 1.25;
+    padding: .5em;
+}
+
+    body.reportLandscapeMode {
+        max-width: 100%;
+        width: 11in !important;
+    }
+
+    body > header {
+        background: #fff;
+        padding: 0 3em .5em 3em;
+    }
+
+article {
+    background: #fff;
+    padding: 0 3em 1em 3em;
+}
+
+.report {
+    font-size: 9pt;
+}
+
+img {
+    height: auto;
+}
+
+.logo img {
+    max-height: 80px;
+    max-width: 180px;
+}
+
+#aPoweredByBlue img {
+    max-height: 20px;
+}
+
+/* Headers */
+h1,
+h2,
+h3,
+h4 {
+    margin: 0 0 .5em;
+}
+
+h1 {
+    font-size: 1.7em;
+}
+
+h2 {
+    font-size: 1.5em;
+    font-weight: normal;
+}
+
+h3 {
+    font-size: 1.3em;
+}
+
+h4 {
+    font-size: 1.2em;
+}
+
+a {
+    text-decoration: none;
+}
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+.cover-page .footer:before,
+.CoverCommentTitle:before,
+.coverPageSignatureBlock:before {
+    content: "";
+    display: block;
+    margin-bottom: 12px;
+    width: 100px;
+    border-bottom: 6px solid #2874bb;
+}
+
+.coverPageTableStyle h1 {
+    text-transform: uppercase;
+    font-size: 2em;
+    line-height: 1.2em;
+}
+
+.pdf-link {
+    text-align: right;
+    padding: 0.5em;
+}
+
+.DownloadReportLink {
+    font-size: 0.9em;
+    text-decoration: underline;
+    display: inline-block;
+    padding-left: 1em;
+}
+
+.link-icon::before {
+    margin: 0 .3em;
+    display: inline-block;
+    content: " ";
+    width: 22px;
+    height: 22px;
+    vertical-align: text-bottom;
+}
+
+.link-icon-csv::before {
+    background: url("../images/icons/csv-noborder.png");
+    -moz-background-size: 22px 22px;
+    background-size: 22px 22px;
+}
+
+.link-icon-pdf::before {
+    background: url("../images/icons/pdf-noborder.png");
+    -moz-background-size: 22px 22px;
+    background-size: 22px 22px;
+}
+
+.link-icon-log::before {
+    background: url("../images/icons/log-noborder.png");
+    -moz-background-size: 22px 22px;
+    background-size: 22px 22px;
+}
+
+.utility-nav {
+    background: #fff;
+    padding: 0.5em;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+.languageLinks {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+}
+
+/*****************************************************************
+    COVER PAGE
+******************************************************************/
+
+.cover-page .header {
+    margin: 0 -3em 1em;
+    display: -webkit-flex;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    padding: 0 3em;
+    -webkit-align-items: stretch;
+    -webkit-box-align: stretch;
+    -moz-box-align: stretch;
+    -ms-flex-align: stretch;
+    align-items: stretch;
+}
+
+.logo a {
+    display: block;
+}
+
+.metadata {
+    padding: 1em 1.5em;
+    -webkit-flex: 1;
+    -webkit-box-flex: 1;
+    -moz-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+}
+
+.report header h2 {
+    margin-top: 0;
+    font-size: 1.7em;
+}
+
+    .report header h2 .project-title {
+        display: block;
+        font-size: 1.5em;
+        font-weight: normal;
+    }
+
+.coverPageTableStyle {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.coverPageCommentsBlock {
+    margin-top: 1em;
+    text-align: justify;
+}
+
+.coverPageContentBlock {
+    margin-top: .5em;
+    text-align: left;
+}
+
+.coverPageTitleBlock {
+    text-align: center;
+}
+
+.coverOddComments {
+    text-align: justify;
+}
+
+dt {
+    float: left;
+}
+
+    dt::after {
+        content: ":";
+        margin-right: .5em;
+    }
+
+dd {
+    font-weight: bold;
+}
+
+.CoverCommentTitle {
+    font-weight: bold;
+    display: block;
+    margin: 1.5em 0 .5em;
+}
+
+.CoverComment {
+    font-weight: normal;
+}
+
+.CoverSignature {
+    Font-Size: 1.1em;
+    font-weight: bold;
+}
+
+.CoverDateTitle {
+    font-weight: bold;
+    font-size: .75em;
+}
+
+.CoverDate {
+    font-size: .75em;
+}
+
+.CoverTabular {
+    margin-bottom: .5em;
+    width: 100%;
+    font-size: .75em;
+}
+
+.cover-page .footer {
+    background: #fff;
+    margin-top: 1.5em;
+}
+
+.blue-logo {
+    text-align: right;
+}
+
+.reportLandscapeMode .cover-page {
+    min-height: 8.5in;
+    height: 100%;
+}
+/* end of Cover page*/
+
+/*************************************************************************
+    TOC
+**************************************************************************/
+.TOC h2 {
+    text-align: center;
+    margin: 0;
+    padding: 1em 0 .5em;
+}
+
+.TOC h3 {
+    margin: 1em 0 .5em;
+}
+
+.toggleImgDiv {
+    text-align: right;
+    border: none;
+}
+
+    .toggleImgDiv img {
+        border: none;
+    }
+
+.Report_TOCHide {
+    font-weight: normal;
+    font-size: 1.1em;
+}
+
+.ChildReportSkipNav {
+    margin-bottom: 1em;
+}
+
+.div_ReturnToTopOfPage {
+    text-align: right;
+}
+
+.Anchor_ReturnToTopOfPage {
+    font-size: .8em;
+}
+/******************************************************************************
+    Hide/Show Elements from HTML Viewer
+******************************************************************************/
+.Anchor_ReturnToTopOfPageHide,
+ul h3:before,
+ul h4:before {
+    Display: none;
+}
+
+ul,
+ol {
+    margin-left: 1em;
+    padding-left: 1em;
+}
+
+/*************************************************************************
+   End  Testing TOC
+**************************************************************************/
+
+/********************************************************************
+      BEGIN Right to Left Styles
+********************************************************************/
+/* Flip Text Direction */
+html[dir=rtl] .coverPageContentBlock,
+html[dir=rtl] .coverPageSignatureBlock,
+html[dir=rtl] .coverEvenComments {
+    text-align: right;
+}
+
+html[dir=rtl] .blue-logo,
+html[dir=rtl] .pdf-link,
+html[dir=rtl] .toggleImgDiv {
+    text-align: left;
+}
+
+/* Flip Float Direction */
+html[dir=rtl] dt {
+    float: right;
+}
+
+    /* Flip Margins */
+    html[dir=rtl] dt::after {
+        margin-left: .5em;
+        margin-right: 0;
+    }
+
+/* Flip Padding */
+html[dir=rtl] .DownloadReportLink {
+    padding-left: 0;
+    padding-right: 1em;
+}
+
+html[dir=rtl] ul,
+html[dir=rtl] ol {
+    margin-left: 0;
+    padding-left: 0;
+    margin-right: 1em;
+    padding-right: 1em;
+}
+
+html[dir=rtl] {
+    margin-left: 10px;
+    margin-right: 0;
+    padding: 0;
+    padding-right: 10px;
+    border-left: 0;
+    border-right: 1px;
+}
+
+/********************************************************************
+      END Right to Left Styles
+********************************************************************/
+
+/********************************************************************
+      BEGIN Utilities
+      RG: Testing new techniques
+********************************************************************/
+.hidden {
+    position: absolute;
+    left: -10000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* change this to use utility */
+table > caption,
+.screen-reader-text {
+    clip: rect(1px, 1px, 1px, 1px);
+    height: 1px;
+    width: 1px;
+    overflow: hidden;
+    position: absolute !important;
+    /* many screen reader and browser combinations announce broken words as they would appear visually */
+    word-wrap: normal !important;
+}
+/********************************************************************
+      END Utilities
+********************************************************************/
+
+/********************************************************************
+      BEGIN Theming
+********************************************************************/
+
+/***********************
+    BLUE
+
+	Container  #828d93
+    Darkest    #35404F
+    Darker     #455367
+    Color      #2773BA
+    Brighter   #D6DEE1
+    Brightest  #ECF2F5
+***********************/
+body.blue {
+    background: #828d93;
+}
+
+/* Darkest  #35404F */
+body.blue,
+.blue table.block-table,
+.blue a:hover {
+    color: #35404F;
+}
+
+    .blue .cover-page .header,
+    .blue table.block-table.CondensedTabular .CondensedTabularHeaderRows > th,
+    .blue .ChartLeftColumn,
+    .blue .ChartLeftColumn_MSChart,
+    .blue .ScaleDistributionCompareTitle,
+    .blue .FrequencyQuestionTitle,
+    .blue .GroupingQuestionTitle {
+        background: #35404F;
+    }
+
+/* Darker   #455367 */
+.blue .TableContainer table.block-table tbody tr:last-child {
+    border-bottom-color: #455367;
+}
+
+.blue .trend-block.TableContainer table.block-table tbody th[rowspan].last-row {
+    border-bottom-color: #455367;
+}
+
+.blue .TableContainer table.block-table tr {
+    border-left-color: #455367;
+    border-right-color: #455367;
+}
+
+.blue .ChartTotal,
+.blue .ChartEvenRow,
+.blue .ChartOddRow,
+.blue .CommentBlockRow,
+.blue .DemographicBlockRow,
+.blue .SpreadsheetBlockRow,
+.blue .QRatingBlockRow,
+.blue .MSChartRaderWrapper,
+.blue .CrossCategoryBlockRow,
+.blue .ResponseTableWithTextWrapper,
+.blue .CategoryGroupingChartWrapper,
+.blue .tagcloud {
+    border-color: #455367;
+}
+
+.blue .FrequencyBlock_FullMain,
+.blue .FrequencyBlock_HalfMain,
+.blue .ChartTotal,
+.blue .ChartEvenRow,
+.blue .ChartOddRow {
+    border-top-color: #455367;
+    border-bottom-color: #455367;
+}
+
+.blue .FrequencyCompareTitle,
+.blue .FrequencyBlock_chart,
+.blue .FrequencyBlock_table,
+.blue .ChartRightColumn {
+    border-left-color: #455367;
+    border-right-color: #455367;
+}
+
+.blue .RespS_Sheet {
+    border: thin solid #455367;
+}
+
+/*Color     #2773BA */
+.blue h3,
+.blue a {
+    color: #2773BA;
+}
+
+body.blue > header,
+.blue .cover-page .header {
+    border-top: 8px solid #2773BA;
+}
+
+.blue .cover-page .footer:before,
+.blue .CoverCommentTitle:before,
+.blue .SectionHeading h3:before,
+.blue .coverPageSignatureBlock:before {
+    border-bottom: 6px solid #2773BA;
+}
+
+.blue .cover-page {
+    border-bottom: 3px solid #2773BA;
+}
+
+/* Brighter  #D6DEE1 */
+
+/* CrossTab Frequency Block */
+.blue table.block-table.CondensedTabularFixedHalfWidth .CondensedTabularHeaderRows > th {
+    background-color: #D6DEE1;
+}
+
+.blue table.block-table tbody td,
+.blue table.block-table tbody th {
+    border-top-color: #D6DEE1;
+}
+
+.blue .InLineCommentsForScore th {
+    background: #D6DEE1;
+}
+/* Brightest #ECF2F5 */
+.blue .FrequencyCompareTitle,
+.blue .FrequencyCompareTitle .FrequencyQuestionTitle {
+    background: #ECF2F5;
+    color: #000;
+}
+
+.blue table.block-table tr:nth-child(even),
+.blue .RespS_Sheet:nth-child(even) {
+    background-color: #ECF2F5;
+}
+
+.blue .trend-block tr {
+    background-color: white;
+}
+
+.blue .trend-block .CondensedTabularOdd {
+    background-color: white;
+}
+
+.blue .trend-block .CondensedTabularEvenRows {
+    background-color: #ECF2F5;
+}
+
+.blue .ChartEvenRowTitle {
+    border-color: #eee;
+    background-color: #ECF2F5;
+}
+
+.blue table.block-table.CondensedTabular th[rowspan="2"] ~ th,
+.blue table.block-table .CondensedTabularGroupedHeadersRow th {
+    border-bottom-color: #ECF2F5;
+}
+
+/* white */
+.blue table.block-table.CondensedTabular .CondensedTabularHeaderRows > th,
+.blue .cover-page .header,
+.blue .ChartLeftColumn,
+.blue .ChartLeftColumn_MSChart,
+.blue .ScaleDistributionCompareTitle,
+.blue .FrequencyQuestionTitle,
+.blue .GroupingQuestionTitle {
+    color: #fff;
+}
+
+@media print {
+    .blue .cover-page .footer {
+        border-bottom: 0.3in solid #35404F;
+    }
+}
+
+/***********************
+    Red_Grey
+
+	container  #444141
+    Darkest    #143546
+    Darker     #685d5d
+    Color      #e3283b
+    Brighter   #c4bebe
+    Brightest  #e2e0df
+***********************/
+
+body.red_grey {
+    background: #828d93;
+}
+
+/* Darkest  #143546 */
+body.red_grey,
+.red_grey table.block-table,
+.red_grey a:hover {
+    color: #143546;
+}
+
+    .red_grey .cover-page .header,
+    .red_grey table.block-table.CondensedTabular .CondensedTabularHeaderRows > th,
+    .red_grey .ChartLeftColumn,
+    .red_grey .ChartLeftColumn_MSChart,
+    .red_grey .ScaleDistributionCompareTitle,
+    .red_grey .FrequencyQuestionTitle,
+    .red_grey .GroupingQuestionTitle {
+        background: #143546;
+    }
+
+/* Darker   #685d5d */
+.red_grey .TableContainer table.block-table tbody tr:last-child {
+    border-bottom-color: #685d5d;
+}
+
+.red_grey .trend-block.TableContainer table.block-table tbody th[rowspan].last-row {
+    border-bottom-color: #685d5d;
+}
+
+.red_grey .TableContainer table.block-table tr {
+    border-left-color: #685d5d;
+    border-right-color: #685d5d;
+}
+
+.red_grey .ChartTotal,
+.red_grey .ChartEvenRow,
+.red_grey .ChartOddRow,
+.red_grey .CommentBlockRow,
+.red_grey .DemographicBlockRow,
+.red_grey .SpreadsheetBlockRow,
+.red_grey .QRatingBlockRow,
+.red_grey .MSChartRaderWrapper,
+.red_grey .CrossCategoryBlockRow,
+.red_grey .ResponseTableWithTextWrapper,
+.red_grey .CategoryGroupingChartWrapper,
+.red_grey .tagcloud {
+    border-color: #685d5d;
+}
+
+.red_grey .FrequencyBlock_FullMain,
+.red_grey .FrequencyBlock_HalfMain,
+.red_grey .ChartTotal,
+.red_grey .ChartEvenRow,
+.red_grey .ChartOddRow {
+    border-top-color: #685d5d;
+    border-bottom-color: #685d5d;
+}
+
+.red_grey .FrequencyCompareTitle,
+.red_grey .FrequencyBlock_chart,
+.red_grey .FrequencyBlock_table,
+.red_grey .ChartRightColumn {
+    border-left-color: #685d5d;
+    border-right-color: #685d5d;
+}
+
+.red_grey .RespS_Sheet {
+    border: thin solid #685d5d;
+}
+
+/*Color     #e3283b */
+.red_grey h3,
+.red_grey a {
+    color: #e3283b;
+}
+
+body.red_grey > header,
+.red_grey .cover-page .header {
+    border-top: 8px solid #e3283b;
+}
+
+.red_grey .cover-page .footer:before,
+.red_grey .CoverCommentTitle:before,
+.red_grey .SectionHeading h3:before,
+.red_grey .coverPageSignatureBlock:before {
+    border-bottom: 6px solid #e3283b;
+}
+
+.red_grey .cover-page {
+    border-bottom: 3px solid #e3283b;
+}
+
+/* Brighter  #c4bebe */
+
+.red_grey .TableContainer table.block-table tbody tr {
+    border-top-color: #c4bebe;
+}
+
+/* CrossTab Frequency Block */
+.red_grey .FrequencyCompareTitle,
+.red_grey .FrequencyCompareTitle .FrequencyQuestionTitle {
+    background: #c4bebe;
+    color: #000;
+}
+
+.red_grey table.block-table.CondensedTabularFixedHalfWidth .CondensedTabularHeaderRows > th {
+    background-color: #c4bebe;
+}
+
+.red_grey table.block-table tbody td,
+.red_grey table.block-table tbody th {
+    border-top-color: #c4bebe;
+}
+
+.red_grey .InLineCommentsForScore th {
+    background: #c4bebe;
+}
+
+/* Brightest #e2e0df */
+
+.red_grey tr:nth-child(even),
+.red_grey .RespS_Sheet:nth-child(even) {
+    background-color: #e2e0df;
+}
+
+.red_grey .trend-block tr {
+    background-color: white;
+}
+
+.red_grey .trend-block .CondensedTabularOdd {
+    background-color: white;
+}
+
+.red_grey .trend-block .CondensedTabularEvenRows {
+    background-color: #e2e0df;
+}
+
+.red_grey .ChartEvenRowTitle {
+    border-color: #eee;
+    background-color: #e2e0df;
+}
+
+.red_grey table.block-table.CondensedTabular th[rowspan="2"] ~ th,
+.red_grey table.block-table .CondensedTabularGroupedHeadersRow th {
+    border-bottom-color: #e2e0df;
+}
+
+/* white */
+.red_grey table.block-table.CondensedTabular .CondensedTabularHeaderRows > th,
+.red_grey .cover-page .header,
+.red_grey .ChartLeftColumn,
+.red_grey .ChartLeftColumn_MSChart,
+.red_grey .ScaleDistributionCompareTitle,
+.red_grey .FrequencyQuestionTitle,
+.red_grey .GroupingQuestionTitle {
+    color: #fff;
+}
+
+@media print {
+    .red_grey .cover-page .footer {
+        border-bottom: 0.3in solid #143546;
+    }
+}
+
+/***********************
+   KHAKI
+
+    container  #3b3d38
+    Darkest    #4c4241
+    Darker     #6d6464
+    Color      #646e53
+    Brighter   #b7bba6
+    Brightest  #e5ebd0
+***********************/
+
+body.Khaki {
+    background: #3b3d38;
+}
+
+/* Darkest  #4c4241 */
+body.Khaki,
+.Khaki table.block-table,
+.Khaki a:hover {
+    color: #4c4241;
+}
+
+    .Khaki .cover-page .header,
+    .Khaki .cover-page .header,
+    .Khaki table.block-table.CondensedTabular .CondensedTabularHeaderRows > th,
+    .Khaki .ChartLeftColumn,
+    .Khaki .ChartLeftColumn_MSChart,
+    .Khaki .ScaleDistributionCompareTitle,
+    .Khaki .FrequencyQuestionTitle,
+    .Khaki .GroupingQuestionTitle {
+        background: #4c4241;
+    }
+
+/* Darker   #6d6464 */
+.Khaki .TableContainer table.block-table tbody tr:last-child {
+    border-bottom-color: #6d6464;
+}
+
+.Khaki .trend-block.TableContainer table.block-table tbody th[rowspan].last-row {
+    border-bottom-color: #6d6464;
+}
+
+.Khaki .TableContainer table.block-table tr {
+    border-left-color: #6d6464;
+    border-right-color: #6d6464;
+}
+
+.Khaki .ChartTotal,
+.Khaki .ChartEvenRow,
+.Khaki .ChartOddRow,
+.Khaki .CommentBlockRow,
+.Khaki .DemographicBlockRow,
+.Khaki .SpreadsheetBlockRow,
+.Khaki .QRatingBlockRow,
+.Khaki .MSChartRaderWrapper,
+.Khaki .CrossCategoryBlockRow,
+.Khaki .ResponseTableWithTextWrapper,
+.Khaki .CategoryGroupingChartWrapper,
+.Khaki .tagcloud {
+    border-color: #6d6464;
+}
+
+.Khaki .FrequencyBlock_FullMain,
+.Khaki .FrequencyBlock_HalfMain,
+.Khaki .ChartTotal,
+.Khaki .ChartEvenRow,
+.Khaki .ChartOddRow {
+    border-top-color: #6d6464;
+    border-bottom-color: #6d6464;
+}
+
+.Khaki .FrequencyCompareTitle,
+.Khaki .FrequencyBlock_chart,
+.Khaki .FrequencyBlock_table,
+.Khaki .ChartRightColumn {
+    border-left-color: #6d6464;
+    border-right-color: #6d6464;
+}
+
+.Khaki .RespS_Sheet {
+    border: thin solid #6d6464;
+}
+
+/*Color     #646e53 */
+.Khaki h3,
+.Khaki a {
+    color: #646e53;
+}
+
+body.Khaki > header,
+.Khaki .cover-page .header {
+    border-top: 8px solid #646e53;
+}
+
+.Khaki .cover-page .footer:before,
+.Khaki .CoverCommentTitle:before,
+.Khaki .SectionHeading h3:before,
+.Khaki .coverPageSignatureBlock:before {
+    border-bottom: 6px solid #646e53;
+}
+
+.Khaki .cover-page {
+    border-bottom: 3px solid #646e53;
+}
+
+/* Brighter  #b7bba6 */
+
+.Khaki .TableContainer table.block-table tbody tr {
+    border-top-color: #b7bba6;
+}
+
+/* CrossTab Frequency Block */
+.Khaki .FrequencyCompareTitle,
+.Khaki .FrequencyCompareTitle .FrequencyQuestionTitle {
+    background: #b7bba6;
+    color: #000;
+}
+
+.Khaki table.block-table.CondensedTabularFixedHalfWidth .CondensedTabularHeaderRows > th {
+    background-color: #b7bba6;
+}
+
+.Khaki table.block-table tbody td,
+.Khaki table.block-table tbody th {
+    border-top-color: #b7bba6;
+}
+
+.Khaki .InLineCommentsForScore th {
+    background: #b7bba6;
+}
+/* Brightest #e5ebd0 */
+
+.Khaki table.block-table tr:nth-child(even),
+.Khaki .RespS_Sheet:nth-child(even) {
+    background-color: #e5ebd0;
+}
+
+.Khaki .trend-block table.block-table tr {
+    background-color: white;
+}
+
+.Khaki .trend-block .CondensedTabularOdd {
+    background-color: white;
+}
+
+.Khaki .trend-block .CondensedTabularEvenRows {
+    background-color: #e5ebd0;
+}
+
+.Khaki .ChartEvenRowTitle {
+    border-color: #eee;
+    background-color: #e5ebd0;
+}
+
+.Khaki table.block-table.CondensedTabular th[rowspan="2"] ~ th,
+.Khaki table.block-table .CondensedTabularGroupedHeadersRow th {
+    border-bottom-color: #e5ebd0;
+}
+
+/* white */
+.Khaki table.block-table.CondensedTabular .CondensedTabularHeaderRows > th,
+.Khaki .cover-page .header,
+.Khaki .ChartLeftColumn,
+.Khaki .ChartLeftColumn_MSChart,
+.Khaki .ScaleDistributionCompareTitle,
+.Khaki .FrequencyQuestionTitle,
+.Khaki .GroupingQuestionTitle {
+    color: #fff;
+}
+
+@media print {
+    .Khaki .cover-page .footer {
+        border-bottom: 0.3in solid #4c4241;
+    }
+}
+
+/***********************
+   BROWN
+
+    container  #756a66
+    Darkest    #202928
+    Darker     #756a66
+    Color      #534540
+    Brighter   #c6bbab
+    Brightest  #efe8db
+***********************/
+
+body.brown {
+    background: #756a66;
+}
+
+/* Darkest  #202928 */
+body.brown,
+.brown table.block-table,
+.brown a:hover {
+    color: #202928;
+}
+
+    .brown .cover-page .header,
+    .brown table.block-table.CondensedTabular .CondensedTabularHeaderRows > th,
+    .brown .ChartLeftColumn,
+    .brown .ChartLeftColumn_MSChart,
+    .brown .ScaleDistributionCompareTitle,
+    .brown .FrequencyQuestionTitle,
+    .brown .GroupingQuestionTitle {
+        background: #202928;
+    }
+
+/* Darker   #756a66 */
+.brown .TableContainer table.block-table tbody tr:last-child {
+    border-bottom-color: #756a66;
+}
+
+.brown .trend-block.TableContainer table.block-table tbody th[rowspan].last-row {
+    border-bottom-color: #756a66;
+}
+
+.brown .TableContainer table.block-table tr {
+    border-left-color: #756a66;
+    border-right-color: #756a66;
+}
+
+.brown .ChartTotal,
+.brown .ChartEvenRow,
+.brown .ChartOddRow,
+.brown .CommentBlockRow,
+.brown .DemographicBlockRow,
+.brown .SpreadsheetBlockRow,
+.brown .QRatingBlockRow,
+.brown .MSChartRaderWrapper,
+.brown .CrossCategoryBlockRow,
+.brown .ResponseTableWithTextWrapper,
+.brown .CategoryGroupingChartWrapper,
+.brown .tagcloud {
+    border-color: #756a66;
+}
+
+.brown .FrequencyBlock_FullMain,
+.brown .FrequencyBlock_HalfMain,
+.brown .ChartTotal,
+.brown .ChartEvenRow,
+.brown .ChartOddRow {
+    border-top-color: #756a66;
+    border-bottom-color: #756a66;
+}
+
+.brown .FrequencyCompareTitle,
+.brown .FrequencyBlock_chart,
+.brown .FrequencyBlock_table,
+.brown .ChartRightColumn {
+    border-left-color: #756a66;
+    border-right-color: #756a66;
+}
+
+.brown .RespS_Sheet {
+    border: thin solid #756a66;
+}
+
+/*Color     #534540 */
+.brown h3,
+.brown a {
+    color: #534540;
+}
+
+body.brown > header,
+.brown .cover-page .header {
+    border-top: 8px solid #534540;
+}
+
+.brown .cover-page .footer:before,
+.brown .CoverCommentTitle:before,
+.brown .SectionHeading h3:before,
+.brown .coverPageSignatureBlock:before {
+    border-bottom: 6px solid #534540;
+}
+
+.brown .cover-page {
+    border-bottom: 3px solid #534540;
+}
+
+/* Brighter  #c6bbab */
+
+.brown .TableContainer table.block-table tbody tr {
+    border-top-color: #c6bbab;
+}
+
+/* CrossTab Frequency Block */
+.brown .FrequencyCompareTitle,
+.brown .FrequencyCompareTitle .FrequencyQuestionTitle {
+    background: #c6bbab;
+    color: #000;
+}
+
+.brown table.block-table.CondensedTabularFixedHalfWidth .CondensedTabularHeaderRows > th {
+    background-color: #c6bbab;
+}
+
+.brown table.block-table tbody td,
+.brown table.block-table tbody th {
+    border-top-color: #c6bbab;
+}
+
+.brown .InLineCommentsForScore th {
+    background: #c6bbab;
+}
+
+/* Brightest #efe8db */
+
+.brown table.block-table tr:nth-child(even),
+.brown .RespS_Sheet:nth-child(even) {
+    background-color: #efe8db;
+}
+
+.brown .trend-block table.block-table tr {
+    background-color: white;
+}
+
+.brown .trend-block .CondensedTabularOdd {
+    background-color: white;
+}
+
+.brown .trend-block .CondensedTabularEvenRows {
+    background-color: #efe8db;
+}
+
+.brown .ChartEvenRowTitle {
+    border-color: #eee;
+    background-color: #efe8db;
+}
+
+.brown table.block-table.CondensedTabular th[rowspan="2"] ~ th,
+.brown table.block-table .CondensedTabularGroupedHeadersRow th {
+    border-bottom-color: #efe8db;
+}
+
+/* white */
+.brown table.block-table.CondensedTabular .CondensedTabularHeaderRows > th,
+.brown .cover-page .header,
+.brown .ChartLeftColumn,
+.brown .ChartLeftColumn_MSChart,
+.brown .ScaleDistributionCompareTitle,
+.brown .FrequencyQuestionTitle,
+.brown .GroupingQuestionTitle {
+    color: #fff;
+}
+
+@media print {
+    .brown .cover-page .footer {
+        border-bottom: 0.3in solid #202928;
+    }
+}
+
+/********************************************************************
+      END Colors
+********************************************************************/
+
+/********************************************************************
+    BEGIN For Print (Including PDF Converter)
+    Because of multiple color themes, using important for removing from print
+********************************************************************/
+@media print {
+    html {
+        padding: 0;
+        background: #fff;
+    }
+
+    body {
+        font-size: 10pt;
+        width: 8.5in !important;
+        padding: 0 !important;
+        margin: auto;
+        border: 0 !important;
+    }
+
+    .cover-page {
+        position: relative;
+        height: 11in;
+        border: 0 !important;
+    }
+
+        .cover-page .header {
+            margin: 0 -0.5in 1em;
+        }
+
+        .cover-page .footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            margin: 0 -0.5in;
+            padding: 0 0.5in 0.1in;
+        }
+
+    /********************************************************************
+          BEGIN PDF Page Breaks
+    ********************************************************************/
+
+    .coverPageTableStyle h1 {
+        page-break-before: avoid;
+    }
+
+    /* After */
+    h1,
+    h2,
+    h3 {
+        page-break-after: avoid;
+    }
+    /********************************************************************
+          END PDF Page Breaks
+    ********************************************************************/
+    /******************************************************************************
+    Hide/Show Elements from Print
+    ******************************************************************************/
+
+    .utility-nav,
+    .TOC,
+    .pdf-link,
+    .printHeadFooter {
+        DISPLAY: none;
+        position: absolute;
+    }
+
+    /******************************************************************************
+        Cover Page
+    ******************************************************************************/
+    .coverPageTableStyle {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .coverPageCommentsBlock {
+        margin-top: 1em;
+        text-align: justify;
+    }
+
+    .coverPageSignatureBlock {
+        text-align: left;
+    }
+
+    .coverPageContentBlock {
+        margin-top: .5em;
+        text-align: left;
+    }
+
+    .coverPageTitleBlock {
+        text-align: center;
+    }
+
+    .coverOddComments {
+        text-align: justify;
+    }
+
+    .coverPageTableStyle img {
+        border: solid 0 white;
+    }
+}
