@@ -1,7 +1,7 @@
 import glob
 import process_doc as process_doc
 
-raw_evals_format = './raw_course_evals/*.html'
+raw_evals_format = './sample_evals/*.html'
 
 
 def main():
