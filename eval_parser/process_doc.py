@@ -47,9 +47,9 @@ def extract_instructors(data_dict, text):
     text = text.removeprefix(':')
     text = text.strip()
     instructors = text.split(',')
+    data_dict['instructors'] = []
     for instructor in instructors:
-        instructor.strip()
-    data_dict['instructors'] = instructors
+        data_dict['instructors'].append(instructor.strip())
 
 
 def extract_quarter(data_dict, soup):
