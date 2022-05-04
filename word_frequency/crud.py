@@ -2,7 +2,8 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 from typing import List
 
-from . import models, schemas
+import models
+import schemas
 
 
 def get_section(db: Session, section: schemas.Section):

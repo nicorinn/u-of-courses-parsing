@@ -1,10 +1,11 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
+import uvicorn
 
-from word_frequency import schemas
-from word_frequency import models
-from word_frequency.crud import add_section, add_word, get_section, get_word
-from word_frequency.database import SessionLocal, engine
+import schemas
+import models
+from crud import add_section, add_word, get_section, get_word
+from database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -46,3 +47,7 @@ def saveSection(section: schemas.Section, db: Session = Depends(get_db)):
         result = add_section(db, section)
         return result
     return {"message": "Section already exists"}
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
