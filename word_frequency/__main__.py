@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 import uvicorn
+from typing import List
 
 import schemas
 import models
@@ -34,7 +35,16 @@ def getWord(word: str, db: Session = Depends(get_db)):
     return word_result
 
 
-@app.post("/words", response_model=schemas.Word)
+@app.post("/words", response_model=List[schemas.Word])
+def saveWords(words: List[schemas.Word], db: Session = Depends(get_db)):
+    response_data = []
+    for word_and_count in words:
+        result = add_word(db, word_and_count)
+        response_data.append(result)
+    return response_data
+
+
+@app.post("/words/word", response_model=schemas.Word)
 def saveWord(word: schemas.Word, db: Session = Depends(get_db)):
     result = add_word(db, word)
     return result

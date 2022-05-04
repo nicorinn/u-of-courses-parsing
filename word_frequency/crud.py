@@ -1,6 +1,5 @@
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
-from typing import List
 
 import models
 import schemas
@@ -32,15 +31,19 @@ def add_section(db: Session, section: schemas.Section):
     return new_section
 
 
-def add_word(db: Session, word: schemas.Word):
-    existing_word = get_word(db, word.word)
+def add_word(db: Session, word_and_count: schemas.Word):
+    existing_word = get_word(db, word_and_count.word)
     if existing_word != None:
-        existing_word.count += word.count
+        print('here')
+        existing_word.count += word_and_count.count
         db.commit()
         db.refresh(existing_word)
         return existing_word
     else:
-        new_word = models.Word(word=word.word, count=word.count)
+        print(word_and_count)
+        new_word = models.Word(word=word_and_count.word,
+                               count=word_and_count.count)
+        print(new_word)
         db.add(new_word)
         db.commit()
         db.refresh(new_word)
