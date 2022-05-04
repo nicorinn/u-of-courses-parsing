@@ -34,7 +34,6 @@ def add_section(db: Session, section: schemas.Section):
 def add_word(db: Session, word_and_count: schemas.Word):
     existing_word = get_word(db, word_and_count.word)
     if existing_word != None:
-        print('here')
         existing_word.count += word_and_count.count
         db.commit()
         db.refresh(existing_word)

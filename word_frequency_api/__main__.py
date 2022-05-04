@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 import uvicorn
 from typing import List
+from os import environ
 
 import schemas
 import models
@@ -26,7 +27,7 @@ async def root():
     return {"message": "Word frequency API running"}
 
 
-@app.get("/words/{word}", response_model=schemas.Word)
+@app.get("/api/words/{word}", response_model=schemas.Word)
 def getWord(word: str, db: Session = Depends(get_db)):
     word_result = get_word(db, word)
     if word_result is None:
@@ -35,7 +36,7 @@ def getWord(word: str, db: Session = Depends(get_db)):
     return word_result
 
 
-@app.post("/words", response_model=List[schemas.Word])
+@app.post("/api/words", response_model=List[schemas.Word])
 def saveWords(words: List[schemas.Word], db: Session = Depends(get_db)):
     response_data = []
     for word_and_count in words:
@@ -44,13 +45,13 @@ def saveWords(words: List[schemas.Word], db: Session = Depends(get_db)):
     return response_data
 
 
-@app.post("/words/word", response_model=schemas.Word)
+@app.post("/api/words/word", response_model=schemas.Word)
 def saveWord(word: schemas.Word, db: Session = Depends(get_db)):
     result = add_word(db, word)
     return result
 
 
-@app.post("/sections")
+@app.post("/api/sections")
 def saveSection(section: schemas.Section, db: Session = Depends(get_db)):
     existing_section = get_section(db, section)
     if existing_section is None:
@@ -60,4 +61,4 @@ def saveSection(section: schemas.Section, db: Session = Depends(get_db)):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=environ.get('API_PORT', 8001))

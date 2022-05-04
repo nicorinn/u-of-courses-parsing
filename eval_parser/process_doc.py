@@ -1,9 +1,13 @@
+from ast import Raise
+from statistics import quantiles
 import string
 from bs4 import BeautifulSoup
 import json
 from flair.models import TextClassifier
 from flair.data import Sentence
 import re
+import requests
+import os
 
 
 def process_eval(filename):
@@ -13,7 +17,9 @@ def process_eval(filename):
 
         extract_primary_info(data_dict, soup)
         process_comments(data_dict, soup)
-
+        # Send current section to word frequency API
+        persist_eval_words(data_dict)
+        # Save resulting json
         json_string = json.dumps(data_dict)
         print(json_string)
 
@@ -99,16 +105,36 @@ def get_sentiment_score(comment, classifier):
 
 
 def process_comment_words(data_dict, comment):
-    alpha_only_comment = re.sub("[^a-zA-Z]+", " ", comment.lower())
+    alpha_only_comment = re.sub('[^a-zA-Z]+', ' ', comment.lower())
     comment_words = alpha_only_comment.split()
     for word in comment_words:
-        count_word(word)
         if word in data_dict['words']:
-            print(data_dict)
             data_dict['words'][word] += 1
         else:
             data_dict['words'][word] = 1
 
 
-def count_word(word):
-    print(word)
+def persist_eval_words(data_dict):
+    port = os.environ.get('API_PORT', 8001)
+
+    section_data = {
+        'department_and_number': data_dict['dept_and_num'][0],
+        'year': data_dict['year'],
+        'quarter': data_dict['quarter'],
+        'number': data_dict['sections'][0]
+    }
+    # Save section and verify success
+    section_res = requests.post(
+        'http://localhost:' + str(port) + '/api/sections', data=json.dumps(section_data))
+    section_res.raise_for_status()
+
+    word_list = []
+    for word in data_dict['words'].keys():
+        # TODO remove instructor names
+        word_list.append({
+            "word": word,
+            "count": data_dict['words'][word]})
+    # Save words and verify success
+    res = requests.post('http://localhost:' + str(port) +
+                        '/api/words', data=json.dumps(word_list))
+    res.raise_for_status()
