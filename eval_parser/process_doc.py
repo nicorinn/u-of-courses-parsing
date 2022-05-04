@@ -1,7 +1,9 @@
+import string
 from bs4 import BeautifulSoup
 import json
 from flair.models import TextClassifier
 from flair.data import Sentence
+import re
 
 
 def process_eval(filename):
@@ -30,6 +32,7 @@ def extract_num_and_section(data_dict, text):
     course_nums = text.split(',')
     data_dict['sections'] = []
     data_dict['dept_and_num'] = []
+    data_dict['words'] = {}
 
     for course in course_nums:
         course = course.strip()
@@ -79,8 +82,9 @@ def process_comments(data_dict, soup):
         if table.thead.tr.th.get_text() == 'Comments':
             for row in table.tbody.find_all('tr'):
                 comment = row.td.get_text()
-                comments.append(comment)
                 total_score += get_sentiment_score(comment, classifier)
+                process_comment_words(data_dict, comment)
+                comments.append(comment)
 
     data_dict['sentiment'] = total_score / len(comments)
 
@@ -94,5 +98,17 @@ def get_sentiment_score(comment, classifier):
     return score
 
 
-def save_word(word):
+def process_comment_words(data_dict, comment):
+    alpha_only_comment = re.sub("[^a-zA-Z]+", " ", comment.lower())
+    comment_words = alpha_only_comment.split()
+    for word in comment_words:
+        count_word(word)
+        if word in data_dict['words']:
+            print(data_dict)
+            data_dict['words'][word] += 1
+        else:
+            data_dict['words'][word] = 1
+
+
+def count_word(word):
     print(word)
