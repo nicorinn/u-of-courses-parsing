@@ -1,13 +1,15 @@
+from database import SessionLocal, engine
+from crud import add_section, add_word, get_section, get_word
+import models
+import schemas
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 import uvicorn
 from typing import List
-from os import environ
+from dotenv import dotenv_values
 
-import schemas
-import models
-from crud import add_section, add_word, get_section, get_word
-from database import SessionLocal, engine
+config = dotenv_values(".env")
+
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -61,4 +63,4 @@ def saveSection(section: schemas.Section, db: Session = Depends(get_db)):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=environ.get('API_PORT', 8001))
+    uvicorn.run(app, host="0.0.0.0", port=int(config.get('API_PORT', 8001)))

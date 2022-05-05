@@ -7,7 +7,10 @@ from flair.models import TextClassifier
 from flair.data import Sentence
 import re
 import requests
-import os
+from dotenv import dotenv_values
+
+config = dotenv_values(".env")
+port = config.get('API_PORT', 8001)
 
 
 def process_eval(filename):
@@ -18,6 +21,8 @@ def process_eval(filename):
         extract_primary_info(data_dict, soup)
         process_comments(data_dict, soup)
         # Send current section to word frequency API
+        check_section_validity(data_dict)
+        # Send section words to word frequency API
         persist_eval_words(data_dict)
         # Save resulting json
         json_string = json.dumps(data_dict)
@@ -83,13 +88,14 @@ def process_comments(data_dict, soup):
     classifier = TextClassifier.load('en-sentiment')
 
     total_score = 0
+    instructor_names = create_instructor_name_dict(data_dict['instructors'])
 
     for table in soup.find_all('table'):
         if table.thead.tr.th.get_text() == 'Comments':
             for row in table.tbody.find_all('tr'):
                 comment = row.td.get_text()
                 total_score += get_sentiment_score(comment, classifier)
-                process_comment_words(data_dict, comment)
+                process_comment_words(data_dict, comment, instructor_names)
                 comments.append(comment)
 
     data_dict['sentiment'] = total_score / len(comments)
@@ -104,19 +110,18 @@ def get_sentiment_score(comment, classifier):
     return score
 
 
-def process_comment_words(data_dict, comment):
+def process_comment_words(data_dict, comment, instructor_names):
     alpha_only_comment = re.sub('[^a-zA-Z]+', ' ', comment.lower())
     comment_words = alpha_only_comment.split()
     for word in comment_words:
-        if word in data_dict['words']:
-            data_dict['words'][word] += 1
-        else:
-            data_dict['words'][word] = 1
+        if (word not in instructor_names):
+            if word in data_dict['words']:
+                data_dict['words'][word] += 1
+            else:
+                data_dict['words'][word] = 1
 
 
-def persist_eval_words(data_dict):
-    port = os.environ.get('API_PORT', 8001)
-
+def check_section_validity(data_dict):
     section_data = {
         'department_and_number': data_dict['dept_and_num'][0],
         'year': data_dict['year'],
@@ -125,9 +130,11 @@ def persist_eval_words(data_dict):
     }
     # Save section and verify success
     section_res = requests.post(
-        'http://localhost:' + str(port) + '/api/sections', data=json.dumps(section_data))
+        'http://localhost:' + port + '/api/sections', data=json.dumps(section_data))
     section_res.raise_for_status()
 
+
+def persist_eval_words(data_dict):
     word_list = []
     for word in data_dict['words'].keys():
         # TODO remove instructor names
@@ -135,6 +142,17 @@ def persist_eval_words(data_dict):
             "word": word,
             "count": data_dict['words'][word]})
     # Save words and verify success
-    res = requests.post('http://localhost:' + str(port) +
+    res = requests.post('http://localhost:' + port +
                         '/api/words', data=json.dumps(word_list))
     res.raise_for_status()
+
+# Create exclusion list for instructor names
+
+
+def create_instructor_name_dict(instructors):
+    names = {}
+    for name in instructors:
+        names[name.lower()] = True
+        for subname in name.split():
+            names[subname.lower()] = True
+    return names
