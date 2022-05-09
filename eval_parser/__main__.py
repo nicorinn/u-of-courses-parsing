@@ -1,7 +1,11 @@
 import glob
 import process_doc as process_doc
+from dotenv import dotenv_values
 
-raw_evals_format = './sample_evals/*.html'
+config = dotenv_values(".env")
+evals_dir = config.get('EVALS_DIR')
+
+raw_evals_format = evals_dir + '/*.html'
 
 
 def main():

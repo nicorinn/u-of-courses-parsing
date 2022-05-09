@@ -28,7 +28,6 @@ def process_eval(filename):
         persist_eval_words(data_dict)
         # Save resulting json
         json_string = json.dumps(data_dict)
-        # print(json_string)
         print("")
 
 
@@ -169,11 +168,12 @@ def create_instructor_name_dict(instructors):
 
 def extract_hours_worked(data_dict, soup):
     report_blocks = soup.find_all('div', class_='report-block')
+    hours = -1
     for block in report_blocks:
         if 'hours per week' in block.get_text():
-            extract_hours_from_block(block)
+            hours = extract_hours_from_block(block)
 
-    return 0
+    data_dict['hours'] = hours
 
 
 def extract_hours_from_block(block):
@@ -185,11 +185,12 @@ def extract_hours_from_block(block):
     if image and table and not is_additional_hours_table:
         return -1
     elif image and table and is_additional_hours_table:
-        print(table.tbody.find_all('tr')[1].td.get_text())
+        return table.tbody.find_all('tr')[1].td.get_text()
     # Contains table only. Ex. HUMA 14000 5 - Autumn 2016
     elif table:
-        print(table.tbody.find_all('td')[1].get_text())
+        return table.tbody.find_all('td')[1].get_text()
     # Contains image only. Ex. CMSC 16100 - Autumn 2021
     elif image:
-        print(image.src)
+        hours = process_images.get_hours_worked(image['src'])
+        return hours
     return -1
