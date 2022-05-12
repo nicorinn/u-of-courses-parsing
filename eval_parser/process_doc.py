@@ -17,10 +17,11 @@ def process_eval(filename):
     with open(filename) as course_eval:
         soup = BeautifulSoup(course_eval, 'html.parser')
         data_dict = {}
+        data_dict['chart_data'] = {}
 
         extract_primary_info(data_dict, soup)
-        process_comments(data_dict, soup)
-        extract_hours_worked(data_dict, soup)
+        # process_comments(data_dict, soup)
+        process_report_blocks(data_dict, soup)
 
         # Send current section to word frequency API
         check_section_validity(data_dict)
@@ -166,14 +167,27 @@ def create_instructor_name_dict(instructors):
     return names
 
 
-def extract_hours_worked(data_dict, soup):
+def process_report_blocks(data_dict, soup):
     report_blocks = soup.find_all('div', class_='report-block')
-    hours = -1
     for block in report_blocks:
-        if 'hours per week' in block.get_text():
-            hours = extract_hours_from_block(block)
+        extract_hours_worked(data_dict, block)
+        extract_tabular_data(data_dict, block)
+
+
+def extract_hours_worked(data_dict, block):
+    hours = -1
+    if 'hours per week' in block.get_text():
+        hours = extract_hours_from_block(block)
 
     data_dict['hours'] = hours
+
+
+def extract_tabular_data(data_dict, block):
+    if 'The Instructor' in block.get_text():
+        for row in block.find_all('tr'):
+            th = row.th
+            if th and 'helpful outside of class' in th.get_text():
+                data_dict['chart_data']['helpful_outside_class'] = row.td.get_text()
 
 
 def extract_hours_from_block(block):
