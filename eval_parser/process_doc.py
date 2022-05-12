@@ -20,7 +20,7 @@ def process_eval(filename):
         data_dict['chart_data'] = {}
 
         extract_primary_info(data_dict, soup)
-        # process_comments(data_dict, soup)
+        process_comments(data_dict, soup)
         process_report_blocks(data_dict, soup)
 
         # Send current section to word frequency API
@@ -188,6 +188,16 @@ def extract_tabular_data(data_dict, block):
             th = row.th
             if th and 'helpful outside of class' in th.get_text():
                 data_dict['chart_data']['helpful_outside_class'] = row.td.get_text()
+    if block.table:
+        for row in block.find_all('tr'):
+            if not row.th:
+                return
+            if 'evaluated fairly' in row.th.get_text():
+                data_dict['chart_data']['evaluated_fairly'] = row.td.get_text()
+            if 'feedback on my performance' in row.th.get_text():
+                data_dict['chart_data']['feedback'] = row.td.get_text()
+            if 'standards for success' in row.th.get_text():
+                data_dict['chart_data']['standards_for_success'] = row.td.get_text()
 
 
 def extract_hours_from_block(block):
