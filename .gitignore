@@ -158,3 +158,5 @@ cython_debug/
 
 # Ignore word frequency database
 /**/word_frequency.db
+
+/selenium/*
