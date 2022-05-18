@@ -61,7 +61,7 @@ def login():
     submit_btn.click()
 
 
-def download_department_year_evals(department, year):
+def load_department_year_results_table(department, year):
     driver.get(
         f'https://coursefeedback.uchicago.edu/?Department={department}&AcademicYear={year}&AcademicTerm=All')
     search_results = WebDriverWait(driver, 5).until(
@@ -69,18 +69,32 @@ def download_department_year_evals(department, year):
     )
     tables = search_results.find_elements(
         by=By.ID, value='evalSearchResults')
+    if len(tables) > 0:
+        return tables[0]
+    else:
+        return None
 
-    if (len(tables) > 0):
-        table = tables[0].find_element(by=By.TAG_NAME, value='tbody')
-        for section in table.find_elements(by=By.CLASS_NAME, value='title'):
-            anchor = section.find_element(by=By.TAG_NAME, value='a')
-            driver.get(anchor.get_attribute('href'))
-            time.sleep(2)
-            save_page()
-            # return to start page
-            driver.get(
-                f'https://coursefeedback.uchicago.edu/?Department={department}&AcademicYear={year}&AcademicTerm=All')
-            time.sleep(1)
+
+def get_results_from_table():
+    tbody = driver.find_element(by=By.TAG_NAME, value='tbody')
+    results = tbody.find_elements(by=By.CLASS_NAME, value='title')
+    return results
+
+
+def download_department_year_evals(department, year):
+    table = load_department_year_results_table(department, year)
+    if not table:
+        return
+    results = get_results_from_table()
+    num_results = len(results)
+    for i in range(num_results):
+        anchor = results[i].find_element(by=By.TAG_NAME, value='a')
+        driver.get(anchor.get_attribute('href'))
+        time.sleep(2)
+        save_page()
+        # return to start page
+        table = load_department_year_results_table(department, year)
+        results = get_results_from_table()
 
 
 def download_evals():
