@@ -20,11 +20,11 @@ def get_hours_worked(image_path):
         line = lines[i]
         count_str = line[line.find('(') + 1: line.find(')')]
         if count_str:
-            count = int(count_str)
+            count = int(float(count_str))
             lower_bound += count * 5 * i
         i += 1
     line = lines[i]
-    student_count = int(line[line.find('(') + 1: line.find(')')])
+    student_count = int(float(line[line.find('(') + 1: line.find(')')]))
     upper_bound = lower_bound + 29
     total = (upper_bound + lower_bound) / 2
     average = total / student_count
