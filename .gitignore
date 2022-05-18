@@ -160,3 +160,4 @@ cython_debug/
 /**/word_frequency.db
 
 /selenium/*
+/json_evals/*

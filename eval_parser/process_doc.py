@@ -8,6 +8,7 @@ import re
 import requests
 import process_images as process_images
 from dotenv import dotenv_values
+import os
 
 config = dotenv_values(".env")
 port = config.get('API_PORT', 8001)
@@ -28,8 +29,19 @@ def process_eval(filename):
         # Send section words to word frequency API
         persist_eval_words(data_dict)
         # Save resulting json
-        json_string = json.dumps(data_dict)
-        print("")
+        save_json(data_dict)
+
+
+def save_json(data_dict):
+    filename = f"{data_dict['dept_and_num'][0]}_{data_dict['sections'][0]}_"
+    filename += f"{data_dict['quarter']}_{data_dict['year']}"
+    filename = f'./json_evals/{filename}.json'
+
+    dirname = os.path.dirname(filename)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    with open(filename, 'w') as fp:
+        json.dump(data_dict, fp, sort_keys=True, indent=4)
 
 
 def extract_primary_info(data_dict, soup):
