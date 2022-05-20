@@ -1,5 +1,5 @@
 from database import SessionLocal, engine
-from crud import add_section, add_word, get_section, get_word
+from crud import add_section, add_word, get_section, get_word, count_sections
 import models
 import schemas
 from fastapi import FastAPI, Depends, HTTPException
@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 import uvicorn
 from typing import List
 from dotenv import dotenv_values
+from math import log
 
 config = dotenv_values(".env")
 
@@ -30,12 +31,14 @@ async def root():
 
 
 @app.get("/api/words/{word}", response_model=int)
-def getWord(word: str, db: Session = Depends(get_db)):
+def getIdf(word: str, db: Session = Depends(get_db)):
     word_result = get_word(db, word)
     if word_result is None:
         raise HTTPException(status_code=404, detail="Word not found")
-    result = len(word_result.sections)
-    return result
+    docs_containing_term = len(word_result.sections)
+    num_docs = count_sections(db)
+    idf = float(log(1 + float(num_docs)/1 + docs_containing_term)) + 1
+    return idf
 
 
 @app.post("/api/words", response_model=List[schemas.WordSchema])

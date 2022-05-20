@@ -1,4 +1,4 @@
-from sqlalchemy import select, update
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
 import models
@@ -20,6 +20,10 @@ def get_word(db: Session, word: str):
         word=word
     )
     return db.execute(statement).scalar_one_or_none()
+
+
+def count_sections(db: Session):
+    return db.query(models.Section).count()
 
 
 def add_section(db: Session, section_and_words: schemas.SectionAndWordsSchema):
