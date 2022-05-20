@@ -100,7 +100,7 @@ def extract_quarter(data_dict, soup):
 
 def process_comments(data_dict, soup):
     comments = []
-    # classifier = TextClassifier.load('en-sentiment')
+    classifier = TextClassifier.load('en-sentiment')
 
     total_score = 0
     instructor_names = create_instructor_name_dict(data_dict['instructors'])
@@ -109,7 +109,7 @@ def process_comments(data_dict, soup):
         if table.thead.tr.th.get_text() == 'Comments':
             for row in table.tbody.find_all('tr'):
                 comment = row.td.get_text()
-                # total_score += get_sentiment_score(comment, classifier)
+                total_score += get_sentiment_score(comment, classifier)
                 process_comment_words(data_dict, comment, instructor_names)
                 comments.append(comment)
 
