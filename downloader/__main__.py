@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from dotenv import dotenv_values
 import time
+import json
 from pynput.keyboard import Key, Controller
 
 config = dotenv_values(".env")
@@ -30,7 +31,12 @@ def save_page():
     time.sleep(1)
     keyboard.press(Key.enter)
     keyboard.release(Key.enter)
-    time.sleep(0.5)
+    time.sleep(1)
+    keyboard.press(Key.esc)
+    keyboard.release(Key.esc)
+    keyboard.press(Key.esc)
+    keyboard.release(Key.esc)
+    time.sleep(1)
 
 
 def get_options(select):
@@ -64,7 +70,7 @@ def login():
 def load_department_year_results_table(department, year):
     driver.get(
         f'https://coursefeedback.uchicago.edu/?Department={department}&AcademicYear={year}&AcademicTerm=All')
-    search_results = WebDriverWait(driver, 5).until(
+    search_results = WebDriverWait(driver, 2).until(
         EC.presence_of_element_located((By.CLASS_NAME, 'search-results'))
     )
     tables = search_results.find_elements(
@@ -81,20 +87,14 @@ def get_results_from_table():
     return results
 
 
-def download_department_year_evals(department, year):
+def get_department_year_urls(department, year, urls):
     table = load_department_year_results_table(department, year)
     if not table:
         return
     results = get_results_from_table()
-    num_results = len(results)
-    for i in range(num_results):
-        anchor = results[i].find_element(by=By.TAG_NAME, value='a')
-        driver.get(anchor.get_attribute('href'))
-        time.sleep(2)
-        save_page()
-        # return to start page
-        table = load_department_year_results_table(department, year)
-        results = get_results_from_table()
+    for result in results:
+        anchor = result.find_element(by=By.TAG_NAME, value='a')
+        urls[anchor.get_attribute('href')] = True
 
 
 def download_evals():
@@ -108,9 +108,20 @@ def download_evals():
     departments = get_options(department_select)
     years = get_options(year_select)
 
+    urls = {}
+
     for department in departments:
         for year in years[::-1]:
-            download_department_year_evals(department, year)
+            if int(year) > 2016:
+                get_department_year_urls(department, year, urls)
+
+    with open('urls', 'w') as fp:
+        json.dump(urls, fp, sort_keys=True, indent=4)
+
+    for url in urls.keys():
+        driver.get(url)
+        time.sleep(3)
+        save_page()
 
 
 if __name__ == '__main__':
