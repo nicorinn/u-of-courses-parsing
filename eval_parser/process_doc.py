@@ -25,9 +25,8 @@ def process_eval(filename):
         process_report_blocks(data_dict, soup)
 
         # Send current section to word frequency API
-        check_section_validity(data_dict)
         # Send section words to word frequency API
-        persist_eval_words(data_dict)
+        send_section_to_words_api(data_dict)
         # Save resulting json
         save_json(data_dict)
 
@@ -101,7 +100,7 @@ def extract_quarter(data_dict, soup):
 
 def process_comments(data_dict, soup):
     comments = []
-    classifier = TextClassifier.load('en-sentiment')
+    # classifier = TextClassifier.load('en-sentiment')
 
     total_score = 0
     instructor_names = create_instructor_name_dict(data_dict['instructors'])
@@ -110,7 +109,7 @@ def process_comments(data_dict, soup):
         if table.thead.tr.th.get_text() == 'Comments':
             for row in table.tbody.find_all('tr'):
                 comment = row.td.get_text()
-                total_score += get_sentiment_score(comment, classifier)
+                # total_score += get_sentiment_score(comment, classifier)
                 process_comment_words(data_dict, comment, instructor_names)
                 comments.append(comment)
 
@@ -160,6 +159,19 @@ def persist_eval_words(data_dict):
     res = requests.post('http://localhost:' + port +
                         '/api/words', data=json.dumps(word_list))
     res.raise_for_status()
+
+
+def send_section_to_words_api(data_dict):
+    section_data = {
+        'department_and_number': data_dict['dept_and_num'][0],
+        'year': data_dict['year'],
+        'quarter': data_dict['quarter'],
+        'number': data_dict['sections'][0],
+    }
+    data = {'section': section_data, 'words': list(data_dict['words'].keys())}
+    section_res = requests.post(
+        'http://localhost:' + port + '/api/sections', data=json.dumps(data))
+    section_res.raise_for_status()
 
 
 def create_instructor_name_dict(instructors):
