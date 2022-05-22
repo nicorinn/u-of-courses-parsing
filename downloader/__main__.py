@@ -1,3 +1,4 @@
+import os
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -14,6 +15,8 @@ username = config.get('USERNAME')
 password = config.get('PASSWORD')
 selenium_dir = config.get('SELENIUM_DIR')
 
+urls_filename = 'downloader/urls.json'
+
 chrome_options = Options()
 chrome_options.add_argument(f'--user-data-dir={selenium_dir}')
 chrome_options.add_argument(f'--profile-directory={selenium_dir}/Profile 2')
@@ -28,10 +31,10 @@ def save_page():
     keyboard.press('s')
     keyboard.release('s')
     keyboard.release(Key.cmd)
-    time.sleep(1)
+    time.sleep(1.5)
     keyboard.press(Key.enter)
     keyboard.release(Key.enter)
-    time.sleep(1)
+    time.sleep(2)
     keyboard.press(Key.esc)
     keyboard.release(Key.esc)
     keyboard.press(Key.esc)
@@ -97,10 +100,17 @@ def get_department_year_urls(department, year, urls):
         urls[anchor.get_attribute('href')] = True
 
 
-def download_evals():
-    # submit login form
-    login()
-    # give myself 60 seconds to approve the login attempt on Duo
+def download_each_eval(urls):
+    for url in urls.keys():
+        driver.get(url)
+        is_loaded = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, 'reportView'))
+        )
+        time.sleep(0.3)
+        save_page()
+
+
+def save_eval_urls():
     department_select = WebDriverWait(driver, 60).until(
         EC.presence_of_element_located((By.ID, 'academicSubject'))
     )
@@ -115,13 +125,22 @@ def download_evals():
             if int(year) > 2016:
                 get_department_year_urls(department, year, urls)
 
-    with open('urls', 'w') as fp:
+    with open(urls_filename, 'w') as fp:
         json.dump(urls, fp, sort_keys=True, indent=4)
 
-    for url in urls.keys():
-        driver.get(url)
-        time.sleep(3)
-        save_page()
+
+def download_evals():
+    # submit login form
+    login()
+    # give myself 60 seconds to approve the login attempt on Duo
+    WebDriverWait(driver, 60).until(
+        EC.presence_of_element_located((By.ID, 'academicSubject'))
+    )
+    if not os.path.exists(urls_filename):
+        save_eval_urls()
+    with open(urls_filename) as urls_file:
+        urls = json.load(urls_file)
+        download_each_eval(urls)
 
 
 if __name__ == '__main__':
