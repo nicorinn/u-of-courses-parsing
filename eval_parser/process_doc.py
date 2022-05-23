@@ -1,17 +1,16 @@
-from ast import Raise
-from statistics import quantiles
-from bs4 import BeautifulSoup
+from email import header
 import json
-from flair.models import TextClassifier
-from flair.data import Sentence
-import re
-import requests
+import os
+from bs4 import BeautifulSoup
 import process_images as process_images
 from dotenv import dotenv_values
-import os
+from process_comments import process_comments
+import requests
+from process_comments import process_comments
 
-config = dotenv_values(".env")
-port = config.get('API_PORT', 8001)
+config = dotenv_values('.env')
+api_key = config.get('API_KEY')
+server_url = config.get('SERVER_URL')
 
 
 def process_eval(filename):
@@ -23,24 +22,10 @@ def process_eval(filename):
         extract_primary_info(data_dict, soup)
         process_comments(data_dict, soup)
         process_report_blocks(data_dict, soup)
-
-        # Send current section to word frequency API
-        # Send section words to word frequency API
-        send_section_to_words_api(data_dict)
-        # Save resulting json
-        save_json(data_dict)
-
-
-def save_json(data_dict):
-    filename = f"{data_dict['dept_and_num'][0]}_{data_dict['sections'][0]}_"
-    filename += f"{data_dict['quarter']}_{data_dict['year']}"
-    filename = f'./json_evals/{filename}.json'
-
-    dirname = os.path.dirname(filename)
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
-    with open(filename, 'w') as fp:
-        json.dump(data_dict, fp, sort_keys=True, indent=4)
+        extract_respondent_info(data_dict, soup)
+        # Send eval to backend
+        parsed_eval = get_camel_case_eval(data_dict)
+        send_eval_to_server(parsed_eval)
 
 
 def extract_primary_info(data_dict, soup):
@@ -52,6 +37,13 @@ def extract_primary_info(data_dict, soup):
     # This must come after title, since some evals have quarter info in the title
     extract_quarter(data_dict, soup)
     extract_instructors(data_dict, split_title[2])
+
+
+def extract_respondent_info(data_dict, soup):
+    respondents_block = soup.find('div', class_='audience-data')
+    respondent_data = respondents_block.find_all('dd')
+    data_dict['enrolled'] = int(respondent_data[0].get_text())
+    data_dict['respondents'] = int(respondent_data[1].get_text())
 
 
 def extract_num_and_section(data_dict, text):
@@ -96,99 +88,6 @@ def extract_quarter(data_dict, soup):
     qtr_and_year_split = qtr_and_year.split(' ')
     data_dict['quarter'] = qtr_and_year_split[0]
     data_dict['year'] = int(qtr_and_year_split[1])
-
-
-def process_comments(data_dict, soup):
-    comments = []
-    classifier = TextClassifier.load('en-sentiment')
-
-    total_score = 0
-    instructor_names = create_instructor_name_dict(data_dict['instructors'])
-
-    for table in soup.find_all('table'):
-        if table.thead.tr.th.get_text() == 'Comments':
-            for row in table.tbody.find_all('tr'):
-                comment = row.td.get_text()
-                total_score += get_sentiment_score(comment, classifier)
-                process_comment_words(data_dict, comment, instructor_names)
-                comments.append(comment)
-
-    data_dict['sentiment'] = total_score / len(comments)
-
-
-def get_sentiment_score(comment, classifier):
-    sentence = Sentence(comment)
-    classifier.predict(sentence)
-    score = sentence.labels[0].score
-    if sentence.labels[0].value == 'NEGATIVE':
-        score = score * -1
-    return score
-
-
-def process_comment_words(data_dict, comment, instructor_names):
-    alpha_only_comment = re.sub('[^a-zA-Z]+', ' ', comment.lower())
-    comment_words = alpha_only_comment.split()
-    for word in comment_words:
-        if (word not in instructor_names):
-            if word in data_dict['words']:
-                data_dict['words'][word] += 1
-            else:
-                data_dict['words'][word] = 1
-
-
-def check_section_validity(data_dict):
-    section_data = {
-        'department_and_number': data_dict['dept_and_num'][0],
-        'year': data_dict['year'],
-        'quarter': data_dict['quarter'],
-        'number': data_dict['sections'][0]
-    }
-    # Save section and verify success
-    section_res = requests.post(
-        'http://localhost:' + port + '/api/sections', data=json.dumps(section_data))
-    section_res.raise_for_status()
-
-
-def persist_eval_words(data_dict):
-    word_list = []
-    for word in data_dict['words'].keys():
-        word_list.append({
-            "word": word,
-            "count": data_dict['words'][word]})
-    # Save words and verify success
-    res = requests.post('http://localhost:' + port +
-                        '/api/words', data=json.dumps(word_list))
-    res.raise_for_status()
-
-
-def send_section_to_words_api(data_dict):
-    section_data = {
-        'department_and_number': data_dict['dept_and_num'][0],
-        'year': data_dict['year'],
-        'quarter': data_dict['quarter'],
-        'number': data_dict['sections'][0],
-    }
-    data = {'section': section_data, 'words': list(data_dict['words'].keys())}
-    section_res = requests.post(
-        'http://localhost:' + port + '/api/sections', data=json.dumps(data))
-    section_res.raise_for_status()
-
-
-def create_instructor_name_dict(instructors):
-    """ Generates a dictionary with instructor first, last, and full names
-
-    Args:
-        instructors (List[string]): List of full names of instructors
-
-    Returns:
-        _type_: Dictionary with instructor first, last, and full names as keys
-    """
-    names = {}
-    for name in instructors:
-        names[name.lower()] = True
-        for subname in name.split():
-            names[subname.lower()] = True
-    return names
 
 
 def process_report_blocks(data_dict, soup):
@@ -242,3 +141,44 @@ def extract_hours_from_block(block):
         hours = process_images.get_hours_worked(image['src'])
         return hours
     return -1
+
+
+def save_json(data_dict):
+    filename = f"{data_dict['dept_and_num'][0]}_{data_dict['sections'][0]}_"
+    filename += f"{data_dict['quarter']}_{data_dict['year']}"
+    filename = f'./json_evals/{filename}.json'
+
+    dirname = os.path.dirname(filename)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    with open(filename, 'w') as fp:
+        json.dump(data_dict, fp, sort_keys=True, indent=4)
+
+
+def get_camel_case_eval(data_dict):
+    return {
+        'apiKey': api_key,
+        'section': {
+            # TODO add more section numbers
+            'number': data_dict['sections'][0],
+            'year': data_dict['year'],
+            'quarter': data_dict['quarter'],
+            'chartData': data_dict['chart_data'],
+            'sentiment': data_dict['sentiment'],
+            'hoursWorked': data_dict['hours'],
+            'isVirtual': False,
+            'enrolledCount': data_dict['enrolled'],
+            'respondentCount': data_dict['respondents'],
+            'title': data_dict['title'],
+            'courseNumbers': data_dict['dept_and_num'],
+            'instructors': data_dict['instructors']
+        }
+    }
+
+
+def send_eval_to_server(course_eval):
+    headers = {'Accept': 'application/json',
+               'Content-Type': 'application/json'}
+    res = requests.post(server_url, headers=headers,
+                        json=course_eval, verify=False)
+    res.raise_for_status()

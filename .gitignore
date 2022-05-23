@@ -156,9 +156,5 @@ cython_debug/
 # Ignore downloaded evals
 /downloaded_evals/*
 
-# Ignore word frequency database
-/**/word_frequency.db
-
 /selenium/*
-/json_evals/*
 urls.json
