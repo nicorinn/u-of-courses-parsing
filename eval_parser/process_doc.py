@@ -236,5 +236,5 @@ def send_eval_to_server(course_eval):
     headers = {'Accept': 'application/json',
                'Content-Type': 'application/json'}
     res = requests.post(server_url, headers=headers,
-                        json=course_eval, verify=False)
+                        json=course_eval)
     res.raise_for_status()
