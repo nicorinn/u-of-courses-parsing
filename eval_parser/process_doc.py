@@ -17,7 +17,6 @@ def process_eval(filename):
     with open(filename) as course_eval:
         soup = BeautifulSoup(course_eval, 'html.parser')
         data_dict = {}
-        data_dict['chart_data'] = {}
         # Exclude evaluations without a valid quarter
         if 'Late Period' in soup.h2.get_text():
             return
@@ -130,17 +129,17 @@ def extract_tabular_data(data_dict, block):
         for row in block.find_all('tr'):
             th = row.th
             if th and 'helpful outside of class' in th.get_text():
-                data_dict['chart_data']['helpful_outside_class'] = row.td.get_text()
+                data_dict['helpful_outside_class'] = row.td.get_text()
     if block.table:
         for row in block.find_all('tr'):
             if not row.th:
                 return
             if 'evaluated fairly' in row.th.get_text():
-                data_dict['chart_data']['evaluated_fairly'] = row.td.get_text()
+                data_dict['evaluated_fairly'] = row.td.get_text()
             if 'feedback on my performance' in row.th.get_text():
-                data_dict['chart_data']['feedback'] = row.td.get_text()
+                data_dict['feedback'] = row.td.get_text()
             if 'standards for success' in row.th.get_text():
-                data_dict['chart_data']['standards_for_success'] = row.td.get_text()
+                data_dict['standards_for_success'] = row.td.get_text()
 
 
 def extract_hours_from_block(block):
@@ -184,24 +183,35 @@ def save_json(data_dict):
 
 
 def get_camel_case_eval(data_dict):
-    return {
+    data = {
         'apiKey': api_key,
         'section': {
             # TODO add more section numbers
             'number': data_dict['sections'][0],
             'year': data_dict['year'],
             'quarter': data_dict['quarter'],
-            'chartData': data_dict['chart_data'],
+            'keywords': data_dict['keywords'],
             'sentiment': data_dict['sentiment'],
-            'hoursWorked': data_dict['hours'],
             'isVirtual': False,
             'enrolledCount': data_dict['enrolled'],
             'respondentCount': data_dict['respondents'],
             'title': data_dict['title'],
             'courseNumbers': data_dict['dept_and_num'],
-            'instructors': data_dict['instructors']
+            'instructors': data_dict['instructors'],
         }
     }
+    if 'feedback' in data_dict:
+        data['usefulFeedback'] = data_dict['feedback']
+    if 'evaluated_fairly' in data_dict:
+        data['evaluatedFairly'] = data_dict['evaluated_fairly']
+    if 'standards_for_success' in data_dict:
+        data['standardsForSuccess'] = data_dict['standards_for_success']
+    if 'helpful_outside_class' in data_dict:
+        data['helpfulOutsideOfClass'] = data_dict['helpful_outside_class']
+    if data_dict['hours'] >= 0:
+        data['hoursWorked'] = data_dict['hours']
+
+    return data
 
 
 def send_eval_to_server(course_eval):

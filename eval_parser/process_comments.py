@@ -37,7 +37,7 @@ def process_comments(data_dict, soup):
     refined_keywords = refine_keywords(
         keywords, instructor_names, unwanted_keywords)
 
-    data_dict['chart_data']['keywords'] = refined_keywords
+    data_dict['keywords'] = refined_keywords
     if len(comments) == 0:
         data_dict['sentiment'] = 0
     else:
