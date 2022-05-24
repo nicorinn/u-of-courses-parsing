@@ -195,21 +195,39 @@ def get_camel_case_eval(data_dict):
             'isVirtual': False,
             'enrolledCount': data_dict['enrolled'],
             'respondentCount': data_dict['respondents'],
-            'title': data_dict['title'],
-            'courseNumbers': data_dict['dept_and_num'],
-            'instructors': data_dict['instructors'],
+            'title': data_dict['title']
         }
     }
     if 'feedback' in data_dict:
-        data['usefulFeedback'] = data_dict['feedback']
+        data['section']['usefulFeedback'] = float(data_dict['feedback'])
+    else:
+        data['section']['usefulFeedback'] = None
+
     if 'evaluated_fairly' in data_dict:
-        data['evaluatedFairly'] = data_dict['evaluated_fairly']
+        data['section']['evaluatedFairly'] = float(
+            data_dict['evaluated_fairly'])
+    else:
+        data['section']['evaluatedFairly'] = None
+
     if 'standards_for_success' in data_dict:
-        data['standardsForSuccess'] = data_dict['standards_for_success']
+        data['section']['standardsForSuccess'] = float(
+            data_dict['standards_for_success'])
+    else:
+        data['section']['standardsForSuccess'] = None
+
     if 'helpful_outside_class' in data_dict:
-        data['helpfulOutsideOfClass'] = data_dict['helpful_outside_class']
+        data['section']['helpfulOutsideOfClass'] = float(
+            data_dict['helpful_outside_class'])
+    else:
+        data['section']['helpfulOutsideOfClass'] = None
+
     if data_dict['hours'] >= 0:
-        data['hoursWorked'] = data_dict['hours']
+        data['section']['hoursWorked'] = data_dict['hours']
+    else:
+        data['section']['hoursWorked'] = None
+
+    data['section']['courseNumbers'] = data_dict['dept_and_num']
+    data['section']['instructors'] = data_dict['instructors']
 
     return data
 

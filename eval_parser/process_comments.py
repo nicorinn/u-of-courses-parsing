@@ -110,4 +110,11 @@ def refine_keywords(keywords, instructor_names, unwanted_keywords):
     length = num_keywords if len(
         refined_keywords) >= num_keywords else len(refined_keywords)
 
-    return refined_keywords[:length]
+    refined_keywords = refined_keywords[:length]
+    object_keywords = []
+    for keyword in refined_keywords:
+        object_keywords.append({
+            'keyword': keyword[0],
+            'score': keyword[1]
+        })
+    return object_keywords
