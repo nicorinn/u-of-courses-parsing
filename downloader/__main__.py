@@ -1,4 +1,7 @@
+from fileinput import filename
+from math import remainder
 import os
+from tabnanny import check
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -16,6 +19,7 @@ password = config.get('PASSWORD')
 selenium_dir = config.get('SELENIUM_DIR')
 
 urls_filename = 'downloader/urls.json'
+titles_urls_filename = 'downloader/titles_urls.json'
 
 chrome_options = Options()
 chrome_options.add_argument(f'--user-data-dir={selenium_dir}')
@@ -57,16 +61,16 @@ def login():
     driver.get('https://coursefeedback.uchicago.edu/')
 
     form = WebDriverWait(driver, 60).until(
-        EC.presence_of_element_located((By.ID, 'login'))
+        EC.presence_of_element_located((By.ID, 'form18'))
     )
 
-    username_input = form.find_element(by=By.ID, value='username')
-    password_input = form.find_element(by=By.ID, value='password')
+    username_input = form.find_element(by=By.ID, value='okta-signin-username')
+    password_input = form.find_element(by=By.ID, value='okta-signin-password')
 
     username_input.send_keys(username)
     password_input.send_keys(password)
 
-    submit_btn = form.find_element(by=By.ID, value='submit')
+    submit_btn = form.find_element(by=By.ID, value='okta-signin-submit')
     submit_btn.click()
 
 
@@ -97,10 +101,11 @@ def get_department_year_urls(department, year, urls):
     results = get_results_from_table()
     for result in results:
         anchor = result.find_element(by=By.TAG_NAME, value='a')
-        urls[anchor.get_attribute('href')] = True
+        urls[anchor.get_attribute('href')] = False
 
 
 def download_each_eval(urls):
+    titles_urls = {}
     for url in urls.keys():
         driver.get(url)
         is_loaded = WebDriverWait(driver, 10).until(
@@ -108,6 +113,11 @@ def download_each_eval(urls):
         )
         time.sleep(0.3)
         save_page()
+        # map each downloaded eval to its url
+        titles_urls[driver.title] = url
+    # save eval filename -> url mapping for later retrieval
+    with open(titles_urls_filename, 'w') as fp:
+        json.dump(titles_urls, fp, sort_keys=True, indent=4)
 
 
 def save_eval_urls():
@@ -123,6 +133,7 @@ def save_eval_urls():
     for department in departments:
         for year in years[::-1]:
             if int(year) > 2016:
+                print(department, year)
                 get_department_year_urls(department, year, urls)
 
     with open(urls_filename, 'w') as fp:

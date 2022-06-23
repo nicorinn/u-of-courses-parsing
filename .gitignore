@@ -158,3 +158,4 @@ cython_debug/
 
 /selenium/*
 urls.json
+titles_urls.json
