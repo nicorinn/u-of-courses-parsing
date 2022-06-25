@@ -1,34 +1,65 @@
 from email import header
 import json
 import os
+from re import U
 from bs4 import BeautifulSoup
 import process_images as process_images
 from dotenv import dotenv_values
 from process_comments import process_comments
 import requests
 from process_comments import process_comments
+from pathlib import Path
 
 config = dotenv_values('.env')
 api_key = config.get('API_KEY')
 server_url = config.get('SERVER_URL')
+evals_dir = config.get('EVALS_DIR')
+
+titles_urls_filename = '../downloader/titles_urls.json'
+titles_urls_path = Path(__file__).parent / titles_urls_filename
 
 
 def process_eval(filename):
-    with open(filename) as course_eval:
-        soup = BeautifulSoup(course_eval, 'html.parser')
-        data_dict = {}
-        # Exclude evaluations without a valid quarter
-        if 'Late Period' in soup.h2.get_text():
-            return
+    with titles_urls_path.open() as titles_urls_file:
+        unformatted_json_urls = json.load(titles_urls_file)
+        json_urls = remove_spaces_from_page_titles(unformatted_json_urls)
 
-        extract_primary_info(data_dict, soup)
-        process_comments(data_dict, soup)
-        process_report_blocks(data_dict, soup)
-        extract_respondent_info(data_dict, soup)
-        # Send eval to backend
-        parsed_eval = get_camel_case_eval(data_dict)
-        send_eval_to_server(parsed_eval)
-        print('')
+        with open(filename) as course_eval:
+            soup = BeautifulSoup(course_eval, 'html.parser')
+            data_dict = {}
+            # Exclude evaluations without a valid quarter
+            if 'Late Period' in soup.h2.get_text():
+                return
+
+            save_eval_url(data_dict, soup, json_urls)
+            extract_primary_info(data_dict, soup)
+            process_comments(data_dict, soup)
+            process_report_blocks(data_dict, soup)
+            extract_respondent_info(data_dict, soup)
+            # Send eval to backend
+            parsed_eval = get_camel_case_eval(data_dict)
+            send_eval_to_server(parsed_eval)
+            print('')
+
+
+def remove_spaces_from_page_titles(unformatted_json_urls):
+    '''Returns an identical dictionary, but with spaces in keys removed.
+    This is necessary because Selenium and BeautifulSoup have different spacing
+    in page titles'''
+    json_urls = {}
+    for key in unformatted_json_urls:
+        spaceless_key = key.replace(' ', '')
+        json_urls[spaceless_key] = unformatted_json_urls[key]
+    return json_urls
+
+
+def save_eval_url(data_dict, soup, title_urls):
+    # for some reason, page titles differ between selenium and beautifulsoup
+    page_title = soup.head.title.get_text().replace(' ', '')
+    if page_title in title_urls:
+        data_dict['url'] = title_urls[page_title]
+    else:
+        data_dict['url'] = None
 
 
 def extract_primary_info(data_dict, soup):
@@ -195,7 +226,9 @@ def get_camel_case_eval(data_dict):
             'isVirtual': False,
             'enrolledCount': data_dict['enrolled'],
             'respondentCount': data_dict['respondents'],
-            'title': data_dict['title']
+            'title': data_dict['title'],
+            'commentCount': data_dict['comment_count'],
+            'url': data_dict['url']
         }
     }
     if 'feedback' in data_dict:

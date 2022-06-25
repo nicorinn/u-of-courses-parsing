@@ -38,6 +38,7 @@ def process_comments(data_dict, soup):
         keywords, instructor_names, unwanted_keywords)
 
     data_dict['keywords'] = refined_keywords
+    data_dict['comment_count'] = len(comments)
     if len(comments) == 0:
         data_dict['sentiment'] = 0
     else:
