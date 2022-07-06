@@ -8,7 +8,7 @@ evals_dir = config.get('EVALS_DIR')
 
 def process_image(image_name, lang_code):
     image_path = evals_dir + image_name[1::]
-    return pytesseract.image_to_string(Image.open(image_path), lang=lang_code)
+    return pytesseract.image_to_string(Image.open(image_path), lang=lang_code, config='--psm 4')
 
 
 def get_hours_worked(image_path):
@@ -18,7 +18,13 @@ def get_hours_worked(image_path):
         average = get_hours_from_ranges(text)
     else:
         average = get_hours_from_exact_list(text)
-    return average
+    if average > 30:
+        print('Hours worked error')
+        print(text)
+        print(average)
+        return -1
+    else:
+        return average
 
 
 def get_hours_from_ranges(text):

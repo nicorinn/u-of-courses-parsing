@@ -14,6 +14,7 @@ config = dotenv_values('.env')
 api_key = config.get('API_KEY')
 server_url = config.get('SERVER_URL')
 evals_dir = config.get('EVALS_DIR')
+is_debug = config.get('MODE') == 'debug'
 
 titles_urls_filename = '../downloader/titles_urls.json'
 titles_urls_path = Path(__file__).parent / titles_urls_filename
@@ -38,7 +39,10 @@ def process_eval(filename):
             extract_respondent_info(data_dict, soup)
             # Send eval to backend
             parsed_eval = get_camel_case_eval(data_dict)
-            send_eval_to_server(parsed_eval)
+            if (is_debug):
+                print(data_dict['hours'])
+            else:
+                send_eval_to_server(parsed_eval)
             print('')
 
 
