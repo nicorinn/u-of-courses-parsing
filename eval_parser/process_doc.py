@@ -11,10 +11,15 @@ from process_comments import process_comments
 from pathlib import Path
 
 config = dotenv_values('.env')
-api_key = config.get('API_KEY')
-server_url = config.get('SERVER_URL')
-evals_dir = config.get('EVALS_DIR')
+
+is_prod = config.get('MODE') == 'production'
 is_debug = config.get('MODE') == 'debug'
+
+api_key = config.get('API_KEY') if is_prod else config.get('TEST_API_KEY')
+server_url = config.get(
+    'SERVER_URL') if is_prod else config.get('TEST_SERVER_URL')
+evals_dir = config.get('EVALS_DIR')
+
 
 titles_urls_filename = '../downloader/titles_urls.json'
 titles_urls_path = Path(__file__).parent / titles_urls_filename
@@ -273,5 +278,5 @@ def send_eval_to_server(course_eval):
     headers = {'Accept': 'application/json',
                'Content-Type': 'application/json'}
     res = requests.post(server_url, headers=headers,
-                        json=course_eval)
+                        json=course_eval, verify=is_prod)
     res.raise_for_status()
