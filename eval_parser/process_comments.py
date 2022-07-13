@@ -18,6 +18,12 @@ unwanted_keywords = ['class', 'lecture', 'lectures', 'knowledge', 'understanding
                      'learn', 'learning', 'learned', 'prof', 'lot', 'made', 'professor',
                      'exam', 'midterm', 'make', 'thing', 'person', 'understand']
 
+first_names = {}
+# read first names from file once since it's a huge file
+with open("eval_parser/names.txt") as f:
+    for line in f:
+        first_names[line] = True
+
 
 def process_comments(data_dict, soup):
     comments = []
@@ -105,7 +111,10 @@ def create_instructor_name_dict(instructors):
 def refine_keywords(keywords, instructor_names, unwanted_keywords):
     refined_keywords = []
     for word in keywords:
-        if word[0].lower() not in instructor_names and word[0].lower() not in unwanted_keywords:
+        not_instructor_name = word[0].lower() not in instructor_names
+        not_unwanted_kw = word[0].lower() not in unwanted_keywords
+        not_first_name = word[0] not in first_names
+        if not_instructor_name and not_unwanted_kw and not_first_name:
             refined_keywords.append(word)
     refined_keywords.sort(key=itemgetter(1))
     length = num_keywords if len(

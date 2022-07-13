@@ -7,7 +7,6 @@ import process_images as process_images
 from dotenv import dotenv_values
 from process_comments import process_comments
 import requests
-from process_comments import process_comments
 from pathlib import Path
 
 config = dotenv_values('.env')
