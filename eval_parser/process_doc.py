@@ -8,6 +8,7 @@ from dotenv import dotenv_values
 from process_comments import process_comments
 import requests
 from pathlib import Path
+import re
 
 config = dotenv_values('.env')
 
@@ -17,57 +18,62 @@ is_debug = config.get('MODE') == 'debug'
 api_key = config.get('API_KEY') if is_prod else config.get('TEST_API_KEY')
 server_url = config.get(
     'SERVER_URL') if is_prod else config.get('TEST_SERVER_URL')
-evals_dir = config.get('EVALS_DIR')
 
-
+evals_dir = config.get('EVALS_DIR') + '/'
 titles_urls_filename = '../downloader/titles_urls.json'
 titles_urls_path = Path(__file__).parent / titles_urls_filename
 
 
-def process_eval(filename):
-    with titles_urls_path.open() as titles_urls_file:
-        unformatted_json_urls = json.load(titles_urls_file)
-        json_urls = remove_spaces_from_page_titles(unformatted_json_urls)
-
-        with open(filename) as course_eval:
-            soup = BeautifulSoup(course_eval, 'html.parser')
-            data_dict = {}
-            # Exclude evaluations without a valid quarter
-            if 'Late Period' in soup.h2.get_text():
-                return
-
-            save_eval_url(data_dict, soup, json_urls)
-            extract_primary_info(data_dict, soup)
-            process_comments(data_dict, soup)
-            process_report_blocks(data_dict, soup)
-            extract_respondent_info(data_dict, soup)
-            # Send eval to backend
-            parsed_eval = get_camel_case_eval(data_dict)
-            if (is_debug):
-                print(data_dict['hours'])
-            else:
-                send_eval_to_server(parsed_eval)
-            print('')
-
-
 def remove_spaces_from_page_titles(unformatted_json_urls):
-    '''Returns an identical dictionary, but with spaces in keys removed.
-    This is necessary because Selenium and BeautifulSoup have different spacing
-    in page titles'''
+    '''Returns an identical dictionary, but with colons in keys replaces with underscores.
+    This is necessary because donwloaded filenames will have underscores in place of colons'''
     json_urls = {}
     for key in unformatted_json_urls:
-        spaceless_key = key.replace(' ', '')
-        json_urls[spaceless_key] = unformatted_json_urls[key]
+        new_key = key.replace(':', '_')
+        new_key = new_key.removeprefix('- ')
+        new_key = new_key.removeprefix('U Chicago Prod - ')
+
+        json_urls[new_key] = unformatted_json_urls[key]
     return json_urls
 
 
-def save_eval_url(data_dict, soup, title_urls):
-    # for some reason, page titles differ between selenium and beautifulsoup
-    page_title = soup.head.title.get_text().replace(' ', '')
-    if page_title in title_urls:
-        data_dict['url'] = title_urls[page_title]
-    else:
-        data_dict['url'] = None
+# load once instead of for each eval
+with titles_urls_path.open() as titles_urls_file:
+    unformatted_json_urls = json.load(titles_urls_file)
+    json_urls = remove_spaces_from_page_titles(unformatted_json_urls)
+
+
+def process_eval(filename):
+    with open(filename) as course_eval:
+        soup = BeautifulSoup(course_eval, 'html.parser')
+        data_dict = {}
+        # Exclude evaluations without a valid quarter
+        if 'Late Period' in soup.h2.get_text():
+            return
+
+        save_eval_url(data_dict, json_urls, filename)
+        extract_primary_info(data_dict, soup)
+        process_comments(data_dict, soup)
+        process_report_blocks(data_dict, soup)
+        extract_respondent_info(data_dict, soup)
+        # Send eval to backend
+        parsed_eval = get_camel_case_eval(data_dict)
+        if (is_debug):
+            print(data_dict['year'], data_dict['url'])
+        else:
+            send_eval_to_server(parsed_eval)
+        print('')
+
+
+def save_eval_url(data_dict, title_urls, filename):
+    title = filename.removeprefix(evals_dir)
+    title = title.removeprefix('- ')
+    title = title.removeprefix('U Chicago Prod - ')
+    title = title.removesuffix('.html')
+    title = title.removesuffix('(1)')
+    title = title.removesuffix('(2)')
+    title = title.replace('  ', ' ')
+    data_dict['url'] = title_urls[title] if title in title_urls else None
 
 
 def extract_primary_info(data_dict, soup):
